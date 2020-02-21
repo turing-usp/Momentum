@@ -24,7 +24,8 @@ def load_data():
         df['date'] = pd.to_datetime(df['date_str'])
         # fixing missing date values
         r = pd.date_range(start=df.date.min(), end=df.date.max())
-        df = df.set_index('date').reindex(r).fillna(method="ffill").rename_axis('date').reset_index()  # fixing missing date values
+        df = df.set_index('date').reindex(r).fillna(method="ffill").rename_axis('date').reset_index()
+        # treat non working days
         df["weekday"] = df.date.dt.weekday
         toDrop5 = df[df['weekday'] == 5].index
         toDrop6 = df[df['weekday'] == 6].index
@@ -45,14 +46,18 @@ def make_portfolio(assets, date, window):
     # date as dd-mm-yy
     date = pd.to_datetime(date)
     for asset in assets:
+        # sign (long 1/short -1) based on past performance on given time frame (default = 252)
         asset["sign"] = np.sign(asset["close"].pct_change(periods=window))
-        # asset["sign"] = 1 # benchmark sempre comprado/vendido
+        # asset["sign"] = 1 # uncomment this line for always long benchmark
+
+    # calculate asset distribution on portfolio based on volatility
     weights = [(1/(asset["volatility"].loc[date]))*asset["sign"].loc[date] for asset in assets]
-    weights /= sum(weights) # sum = 1
+    weights /= sum(weights) # normalize to 100% of portifolio
     for (asset, weight) in zip(assets, weights):
+        # cumulative returns in relation to starting date
         asset["weighted_cumulative_returns"] = weight*(asset["close"]/asset["close"].loc[date] - 1)
         
-
+# plot returns for a given time frame and lookback window for long/short position
 def returns(assets, initial_date, final_date, lookback_window = 252):
     make_portfolio(assets, initial_date, lookback_window)
     returns = assets[-1]["weighted_cumulative_returns"]
