@@ -53,7 +53,13 @@ def prepare(df, window = 252):
     num[num < 0] = 0
     return df
 
-def close_price():
-    asset_data = load()
-    pass
+# def close_price():
+#     asset_data = load()
+#     pass
     
+# Main data
+def get_main_data():
+    data = load()
+    main_data = data[0]
+    for dataframe in data[1:]:
+        main_data = pd.merge(main_data, dataframe, left_index=True, right_index=True)

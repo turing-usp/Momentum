@@ -1,12 +1,24 @@
 import numpy as np
 
-def momentum(main_data, long_only=False, risk=.4):
+def tsmom_dates(main_data):
+    change_month = []
+    dates = main_data.iloc[252:].index 
+    current_date = dates[0]
+    for date in dates[1:]:
+        if date.month != current_date.month:
+            change_month.append(current_date)
+        current_date = date
+        
+    return change_month
+        
+
+def momentum(main_data, long_only=False, risk=.4, date=None):
     asset_return = {}
     assets = list(main_data.columns)
     
-    returns_12 = main_data.pct_change(periods=24) # dias uteis (1 mes)
-    returns_1 = main_data.pct_change(periods=252) # dias uteis (12 meses)
-    vol_1 = main_data.ewm(adjust=True, com=60, min_periods=0).std() #.dropna()
+    returns_1 = main_data.pct_change(periods=24) # dias uteis (1 mes)
+    returns_12 = main_data.pct_change(periods=252) # dias uteis (12 meses)
+    vol_1 = np.sqrt(20) * main_data.ewm(adjust=True, com=60, min_periods=0).std() #.dropna()
     
     for asset in assets:
         tsmom_return = []
