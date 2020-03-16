@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
 
-def load():
-    tickers = ['AN_RAD.CSV','BN_RAD.CSV','CC_RAD.CSV','CN_RAD.CSV','CT_RAD.CSV',\
+tickers = ['AN_RAD.CSV','BN_RAD.CSV','CC_RAD.CSV','CN_RAD.CSV','CT_RAD.CSV',\
             'DA_RAD.CSV','DX_RAD.CSV','EC_RAD.CSV','EN_RAD.CSV','ES_RAD.CSV',\
             'FB_RAD.CSV','FN_RAD.CSV','GS_RAD.CSV','JN_RAD.CSV','JO_RAD.CSV',\
             'KC_RAD.CSV','LB_RAD.CSV','MD_RAD.CSV','MP_RAD.CSV','MW_RAD.CSV',\
@@ -14,6 +13,8 @@ def load():
             'ZW_RAD.CSV','ZZ_RAD.CSV','DT_RAD.CSV','HS_RAD.CSV','LX_RAD.CSV',\
             'NK_RAD.CSV','SP_RAD.CSV','UB_RAD.CSV','AX_RAD.CSV']    #removed ND_RAD.csv since data ends ins 2015
     
+
+def load():
     aux_list =[]
 
     for ticker in tickers:
@@ -26,22 +27,33 @@ def load():
             .reindex(r).fillna(method = "ffill") \
             .rename_axis('date').reset_index() #fixing missing date values
         df["weekday"] = df.date.dt.weekday
-        toDrop5 = df[ df['weekday'] == 5 ].index
-        toDrop6 = df[ df['weekday'] == 6 ].index
+        toDrop5 = df[df['weekday'] == 5].index
+        toDrop6 = df[df['weekday'] == 6].index
         df.drop(toDrop5, inplace=True)
         df.drop(toDrop6, inplace=True)
         df.index = df['date']
         df = df.drop(['date_str','date','weekday'], axis = 1)
         df.fillna(method = "ffill") #treating missing data with forward fill
-        #df["close_returns"]= np.sign(df[ticker[0:2]].pct_change(periods=252)[252:]) #sign function over return from last 252 days
         
-        #df["sign"]= np.sign(df["close"].pct_change(periods=252)[252:]) #sign function over return from last 252 days
-        #num = df["sign"]._get_numeric_data()
-        #num[num < 0] = 0
-        
-        aux_list.append(df.copy())
+        new_df = prepare(df)
+        new_df.columns = ['open', 'high', 'low', ticker[0:2], 'volume', 'open_interest',
+       'daily_returns', 'lagged_returns', 'sign', 'volatility']
+        aux_list.append(new_df[[ticker[0:2]]])
 
     return aux_list
 
-def prepare():
+def prepare(df, window = 252):
+    df["daily_returns"] = df["close"].pct_change()
+    df["lagged_returns"] = df["close"].pct_change(periods=window)
+    # sign function over return from last 252 days
+    df["sign"] = np.sign(df["lagged_returns"])
+    # Exponentially weighted standard deviation, scaled annually, center of mass = 60 days (as in Section 2.4)
+    df["volatility"] = 252*df["daily_returns"].ewm(com=60).std()
+    num = df["sign"]._get_numeric_data()
+    num[num < 0] = 0
+    return df
+
+def close_price():
+    asset_data = load()
     pass
+    
