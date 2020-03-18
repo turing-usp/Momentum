@@ -12,6 +12,24 @@ def tsmom_dates(main_data):
     return change_month
         
 
+def momentum2(df, long_only=False, risk=.4, dates=None):
+    asset_return = {}
+    assets = list(df.columns)
+    
+    returns_1 = df.pct_change(periods=24) # dias uteis (1 mes)
+    returns_12 = df.pct_change(periods=252) # dias uteis (12 meses)
+    vol_1 = np.sqrt(21) * df.pct_change().ewm(adjust=True, com=60, min_periods=0).std() #.dropna()
+    
+    r_1 = returns_1.loc[dates]
+    r_12 = returns_2.loc[dates]
+    
+    for asset in assets:
+        s = sign(returns_12[asset][current_date]) if not long_only else 1
+        r = s * returns_1[asset][current_date] * risk / vol_1[asset][current_date]
+        tsmom_return.append(r)
+    asset_return[asset] = tsmom_return
+    return asset_return
+
 def momentum(main_data, long_only=False, risk=.4, date=None):
     asset_return = {}
     assets = list(main_data.columns)
@@ -37,4 +55,4 @@ def sign(x):
 
 def tsmom_return(assets_return):
     array = np.array(list(assets_return.values()))
-    return np.mean(array, axis=1)
+    return np.mean(array, axis=0)
