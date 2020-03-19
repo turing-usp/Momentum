@@ -10,24 +10,42 @@ def tsmom_dates(main_data):
         current_date = date
         
     return change_month
-        
+
+def tsmom_factor(r_1, r_12, v_1, risk, long_only):
+    if long_only:
+        sinal = np.ones(r_12.shape)
+    else:
+        sinal = np.sign(r_12)
+    return risk * r_1 * sinal / v_1
 
 def momentum2(df, long_only=False, risk=.4, dates=None):
     asset_return = {}
-    assets = list(df.columns)
     
     returns_1 = df.pct_change(periods=24) # dias uteis (1 mes)
     returns_12 = df.pct_change(periods=252) # dias uteis (12 meses)
-    vol_1 = np.sqrt(21) * df.pct_change().ewm(adjust=True, com=60, min_periods=0).std() #.dropna()
+    vol_1 = np.sqrt(21) * df.pct_change().ewm(adjust=True, com=60, min_periods=0).std()
     
     r_1 = returns_1.loc[dates]
-    r_12 = returns_2.loc[dates]
+    r_12 = returns_12.loc[dates]
+    v_1 = vol_1.loc[dates]
     
-    for asset in assets:
-        s = sign(returns_12[asset][current_date]) if not long_only else 1
-        r = s * returns_1[asset][current_date] * risk / vol_1[asset][current_date]
-        tsmom_return.append(r)
-    asset_return[asset] = tsmom_return
+    array = tsmom_factor(
+        r_1.values[1:,:],
+        r_12.values[:-1,:],
+        v_1.values[:-1,:],
+        risk,
+        long_only
+    )
+#     array = tsmom_factor(
+#         r_1.values,
+#         r_12.values,
+#         v_1.values,
+#         risk,
+#         long_only
+#     )
+    
+    for index, asset in enumerate(list(df.columns)):
+        asset_return[asset] = array[:,index]
     return asset_return
 
 def momentum(main_data, long_only=False, risk=.4, date=None):
