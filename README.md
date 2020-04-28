@@ -1,6 +1,6 @@
 # Time Series Momentum
 
-Este repositório contém a implementação do Time Series Momentum, feita pelos membros do Grupo Turing Quant. Implementação baseada no paper: [Time Series Momentum](http://docs.lhpedersen.com/TimeSeriesMomentum.pdf) by Tobias J. Moskowitza, Yao Hua Ooi and Lasse Heje Pedersen.
+Este repositório contém a implementação da estratégia de investimento Time Series Momentum, feita pelos membros do Grupo Turing Quant. Implementação baseada no paper: [Time Series Momentum](http://docs.lhpedersen.com/TimeSeriesMomentum.pdf) by Tobias J. Moskowitza, Yao Hua Ooi and Lasse Heje Pedersen.
 
 ## Uso
 
