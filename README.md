@@ -21,4 +21,4 @@ Para Para seu pleno uso, são necessárias algumas outras bibliotecas e credenci
 - `backtesting` - Realiza o backtesting em grande períodos.
 
 ## Feito por:
- - Lucas Leme Santos 
+ - [Lucas Leme Santos](https://www.linkedin.com/in/lucas-leme-santos/) 
